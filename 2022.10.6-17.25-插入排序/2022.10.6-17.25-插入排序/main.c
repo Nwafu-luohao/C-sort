@@ -9,7 +9,7 @@ void Insert_Sort(int a[], int n) {
 	int i, j, k;
 	for (i = 1; i < n; i++) {
 		// 为a[i]在前面的a[0...i-1]有序区间中找一个合适的位置
-		for (j = i - 1; j >= 0; i--) {
+		for (j = i - 1; j >= 0; j--) {
 			if (a[j] < a[i]) {
 				break;
 			}
