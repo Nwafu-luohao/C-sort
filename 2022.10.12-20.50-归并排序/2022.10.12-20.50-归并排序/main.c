@@ -1,51 +1,64 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 #include <stdio.h>
+#include <stdlib.h>
 
-// 对希尔排序中单个数组进行排序
-// 参数说明：
-// a -- 待排序的数组
-// n -- 数组的长度
-// i -- 组的起始位置
-// gap -- 组的步长
-
-// 组是 从i开始，将相隔gap长度的数都取出 所组成的。
-
-void group_sort(int a[], int n, int i, int gap) {
-	int j;
-	for (j = i + gap; j < n; j += gap) {
-		// 如果a[j] < a[j-gap]，则寻找a[j]位置，并将后面数据的位置都后移。
-		if (a[j] < a[j - gap]) {
-			int tmp = a[j];
-			int k = j - gap;
-			while (k >= 0 && a[k] > tmp) {
-				a[k + gap] = a[k];
-				k -= gap;
-			}
-			a[k + gap] = tmp;
-		}
-	}
-}
-
-// 希尔排序
+// 归并排序：将一个数组中两个相邻有序空间合并成一个
 
 // 参数说明
-// a -- 待排序的数组
-// n -- 数组的长度
+// a -- 包含两个有序区间的数组
+// start -- 第一个有序区间的起始地址
+// mid -- 第一个有序区间的结束地址。也是第二个有序区间的起始地址
+// end -- 第二个有序区间的结束地址
 
-void shell_sort2(int a[], int n) {
-	int i, gap;
-	// gap为步长，每次减为原来的一半。
-	for (gap = n / 2; gap > 0; gap /= 2) {
-		// 共gap个数组，对每一组进行直接插入排序
-		for (i = 0; i < gap; i++) {
-			group_sort(a, n, i, gap);
+void merge(int a[], int start, int mid, int end) {
+	int* tmp = (int*)malloc((end - start + 1) * sizeof(int));
+	// tmp是汇总2个有序区间的临时区域。
+	int i = start; // 第一个有序区的索引
+	int j = mid + 1; // 第二个有序区的索引
+	int k = 0; // 临时区域的索引
+	while (i <= mid && j <= end) {
+		if (a[i] <= a[j]) {
+			tmp[k++] = a[i++];
+		}
+		else {
+			tmp[k++] = a[j++];
 		}
 	}
+	while (i <= mid) {
+		tmp[k++] = a[i++];
+	}
+	while (j <= end) {
+		tmp[k++] = a[j++]; // 将两个有序区间合并
+	}
+	// 排序后的元素，全部都整合到数组a中
+	for (i = 0; i < k; i++) {
+		a[start + i] = tmp[i];
+	}
+	free(tmp);
+	tmp = NULL;
+}
+
+// 归并排序--从上往下
+// 参数说明：
+// a -- 待排序数组
+// start -- 数组的起始地址
+// end -- 数组的结束地址
+//
+void merge_sort_up_to_down(int a[], int start, int end) {
+	if (a == NULL || start >= end) {
+		return;
+	}
+	int mid = (end + start) / 2;
+	merge_sort_up_to_down(a, start, mid); // 递归排序a[start..mid]
+	merge_sort_up_to_down(a, mid + 1, end); // 递归排序a[mid..end]
+	// a[start..mid]和a[mid..end]是两个有序空间
+	// 将它们排序成一个有序空间a[start..end]
+	merge(a, start, mid, end);
 }
 
 int main() {
 	int arr[] = { 9,5,1,6,2,3,0,4,8,7 };
-	shell_sort2(arr, 10);
+	merge_sort_up_to_down(arr, 0, 9);
 	for (int i = 0; i < 10; i++) {
 		printf("%d ", arr[i]);
 	}
